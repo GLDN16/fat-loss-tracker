@@ -9,7 +9,10 @@ import {
   Footprints,
   Droplets,
   AlertTriangle,
+  AlertCircle,
   CheckCircle2,
+  CheckCircle,
+  Circle,
   Scale,
   Calendar,
   ChevronLeft,
@@ -21,6 +24,7 @@ import {
   Sparkles,
   Utensils,
   ShieldAlert,
+  Shield,
   Clock,
   User,
   LogOut,
@@ -31,7 +35,20 @@ import {
   CloudOff,
   BookOpen,
   Info,
-  Target
+  Target,
+  HeartPulse,
+  Heart,
+  Activity,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  BarChart,
+  BarChart2,
+  BarChart3,
+  X,
+  XCircle,
+  Trophy,
+  Timer
 } from 'lucide-react';
 
 // เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
