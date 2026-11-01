@@ -1440,6 +1440,7 @@ function ProfileTab({
 }) {
   const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'ผู้ใช้งาน';
   const userId = user?.id || 'ยังไม่เชื่อมต่อ';
+  const weightToLose = (parseFloat(profile.startWeight) || 0) - (parseFloat(profile.targetWeight) || 0);
 
   return (
     <div className="space-y-4">
@@ -1511,7 +1512,7 @@ function ProfileTab({
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
             <span className="text-zinc-500 text-[10px] uppercase">น้ำหนักเป้าหมาย</span>
             <div className="text-base font-black text-emerald-400 mt-0.5">{profile.targetWeight} กก.</div>
-            <span className="text-[10px] text-zinc-500">เป้าลด {profile.startWeight - profile.targetWeight > 0 ? (profile.startWeight - profile.targetWeight).toFixed(1) : 0} กก.</span>
+            <span className="text-[10px] text-zinc-500">เป้าลด {weightToLose > 0 ? weightToLose.toFixed(1) : '0'} กก.</span>
           </div>
 
           {/* ส่วนสูง (เพิ่มใหม่) */}
@@ -1521,13 +1522,14 @@ function ProfileTab({
             <span className="text-[10px] text-zinc-500">คำนวณอัตราเผาผลาญ</span>
           </div>
 
-          {/* อายุ และ เพศ (เพิ่มใหม่) */}
+          {/* อายุ (เพิ่มใหม่) */}
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
             <span className="text-zinc-500 text-[10px] uppercase">อายุ</span>
             <div className="text-base font-black text-white mt-0.5">{profile.age} ปี</div>
             <span className="text-[10px] text-zinc-500">เพศ{profile.gender === 'male' ? 'ชาย' : 'หญิง'}</span>
           </div>
         </div>
+      </div>
 
       {/* ปุ่มรีเซ็ตโปรแกรม */}
       <div className="pt-2 flex justify-center">
