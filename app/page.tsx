@@ -55,12 +55,10 @@ import {
   Timer
 } from 'lucide-react';
 
-// เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
+// เชื่อมต่อ Supabase
 const supabaseUrl = 'https://ddaofydnexklkxclwuqc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkYW9meWRuZXhrbGt4Y2x3dXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjU2MjQsImV4cCI6MjEwOTEwMTYyNH0.3Abkj_ZhUOnaL9m-3RuuD2Xz6Mi3fpLgTyfbsYghO6M';
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'emergency-fat-loss-pwa';
 
 // --- HIGH VOLUME / LEAN PROTEIN PRESETS ---
 const MEAL_PRESETS = [
@@ -128,7 +126,7 @@ const createEmptyDay = (dayNum) => ({
     lunch: { completed: false, description: '', calories: 0, protein: 0, tags: [] },
     dinner: { completed: false, description: '', calories: 0, protein: 0, tags: [] }
   },
-  waterMl: 0, // Target: 3000ml (3.0L)
+  waterMl: 0,
   zeroLiquidSugarConfirmed: false,
   steps: 0,
   zone2Minutes: 0
@@ -177,7 +175,6 @@ export default function App() {
 
   // --- APP STATE ---
   const [state, setState] = useState(() => {
-    // Immediate local recovery fallback
     try {
       const local = localStorage.getItem('emergency_fatloss_cache');
       if (local) return JSON.parse(local);
@@ -187,11 +184,8 @@ export default function App() {
     return createInitialState();
   });
 
-  // Navigation tab: 'today' | 'timeline' | 'milestones' | 'profile'
   const [activeTab, setActiveTab] = useState('today');
-
-  // Modals & Panels
-  const [presetModalTarget, setPresetModalTarget] = useState(null); // 'lunch' | 'dinner' | null
+  const [presetModalTarget, setPresetModalTarget] = useState(null);
   const [activeMilestoneModal, setActiveMilestoneModal] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -199,30 +193,40 @@ export default function App() {
 
   const isRemoteUpdate = useRef(false);
 
-  // Toast Notification Helper
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-// --- SUPABASE AUTH & CLOUD SYNC ---
+  // --- 1. SUPABASE AUTH LISTENER ---
   useEffect(() => {
-    // 1. ตรวจสอบสถานะการล็อกอินปัจจุบัน
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+        setSyncStatus('synced');
+      }
       setAuthLoading(false);
     });
 
-    // 2. ตรวจจับเหตุการณ์ Login / Logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+        setSyncStatus('synced');
+        // ล้าง token บนแถบ URL ออกให้อ่านง่ายขึ้น
+        if (window.location.hash.includes('access_token')) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } else {
+        setUser(null);
+        setSyncStatus('offline');
+      }
       setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // 3. ดึงข้อมูลจาก Cloud เมื่อมีผู้ใช้ล็อกอิน
+  // --- 2. ดึงข้อมูลจาก CLOUD เมื่อล็อกอินสำเร็จ ---
   useEffect(() => {
     if (!user) return;
 
@@ -233,7 +237,7 @@ export default function App() {
           .from('user_tracker')
           .select('tracker_data')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (data && data.tracker_data) {
           isRemoteUpdate.current = true;
@@ -242,13 +246,14 @@ export default function App() {
           setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
           showToast('ซิงก์ข้อมูลจากระบบคลาวด์เรียบร้อย');
         } else {
-          // ผู้ใช้ใหม่: บันทึกข้อมูลตั้งต้นขึ้น Cloud
+          // หากเป็นผู้ใช้ใหม่ ให้บันทึกข้อมูลตั้งต้นขึ้น Cloud
           await supabase.from('user_tracker').upsert({
             user_id: user.id,
             tracker_data: state,
             updated_at: new Date().toISOString(),
           });
           setSyncStatus('synced');
+          setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         }
       } catch (err) {
         console.error('Fetch cloud data error:', err);
@@ -259,7 +264,7 @@ export default function App() {
     fetchUserData();
   }, [user?.id]);
 
-  // 4. บันทึกข้อมูลอัตโนมัติเมื่อมีการแก้ไข (Debounce 800ms)
+  // --- 3. บันทึกข้อมูลขึ้น SUPABASE อัตโนมัติ (DEBOUNCE 800MS) ---
   useEffect(() => {
     if (!user) {
       try {
@@ -296,124 +301,15 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [state, user]);
 
-// --- SUPABASE CLOUD SYNC & AUTH ---
-  useEffect(() => {
-    // ตรวจสอบ session ทันทีที่เปิดเว็บ
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-    });
-
-    // ตรวจจับสถานะการ Login / Logout
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // ดึงข้อมูลของผู้ใช้เมื่อล็อกอินสำเร็จ
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchUserData = async () => {
-      setSyncStatus('saving');
-      try {
-        const { data, error } = await supabase
-          .from('user_tracker')
-          .select('tracker_data')
-          .eq('user_id', user.id)
-          .single();
-
-        if (data && data.tracker_data) {
-          isRemoteUpdate.current = true;
-          setState(data.tracker_data);
-          setSyncStatus('synced');
-          setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          showToast('ซิงก์ข้อมูลจากระบบคลาวด์เรียบร้อย');
-        } else {
-          // หากเป็นผู้ใช้ใหม่ ให้บันทึก state ปัจจุบันขึ้นเป็นข้อมูลเริ่มต้น
-          await supabase.from('user_tracker').upsert({
-            user_id: user.id,
-            tracker_data: state,
-            updated_at: new Date().toISOString(),
-          });
-          setSyncStatus('synced');
-        }
-      } catch (err) {
-        console.error('Fetch cloud data error:', err);
-        setSyncStatus('error');
-      }
-    };
-
-    fetchUserData();
-  }, [user?.id]);
-
-  // บันทึกข้อมูลขึ้น Supabase อัตโนมัติเมื่อมีการเปลี่ยนแปลง (Debounce 0.8s)
-  useEffect(() => {
-    if (!user) {
-      try {
-        localStorage.setItem('emergency_fatloss_cache', JSON.stringify(state));
-      } catch (e) {
-        console.warn('LocalStorage save error:', e);
-      }
-      return;
-    }
-
-    if (isRemoteUpdate.current) {
-      isRemoteUpdate.current = false;
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setSyncStatus('saving');
-      try {
-        const { error } = await supabase.from('user_tracker').upsert({
-          user_id: user.id,
-          tracker_data: state,
-          updated_at: new Date().toISOString(),
-        });
-
-        if (error) throw error;
-        setSyncStatus('synced');
-        setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-      } catch (err) {
-        console.error('Save to cloud error:', err);
-        setSyncStatus('error');
-      }
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [state, user]);
-
-  // --- 3. CLOUD SAVE WITH LOCAL RECOVERY ---
+  // ฟังก์ชันอัปเดต state ภายในเครื่อง
   const saveState = (updater) => {
     setState((prevState) => {
       const nextState = typeof updater === 'function' ? updater(prevState) : updater;
-
-      // Local storage instant cache
       try {
         localStorage.setItem('emergency_fatloss_cache', JSON.stringify(nextState));
       } catch (e) {
         console.warn("Local storage cache write:", e);
       }
-
-      // Sync to Firestore if authenticated
-      if (user && db && !isRemoteUpdate.current) {
-        setSyncStatus('saving');
-        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'data', 'tracker_state');
-        setDoc(userDocRef, { ...nextState, updatedAt: Date.now() }, { merge: true })
-          .then(() => {
-            setSyncStatus('synced');
-            setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          })
-          .catch((err) => {
-            console.error("Cloud persist failed:", err);
-            setSyncStatus('error');
-          });
-      }
-      isRemoteUpdate.current = false;
       return nextState;
     });
   };
@@ -430,7 +326,6 @@ export default function App() {
     const factor = ACTIVITY_MULTIPLIERS[activityLevel]?.factor || 1.4;
     const tdee = Math.round(bmr * factor);
 
-    // Emergency protocol: TDEE - 700 kcal, Protein = 2g / kg
     const dailyCalories = Math.max(1200, tdee - 700);
     const proteinTarget = Math.round(w * 2);
 
@@ -444,11 +339,9 @@ export default function App() {
     };
   }, [state.profile]);
 
-  // Current Day & Week
   const currentDayData = state.days[state.currentDay] || createEmptyDay(state.currentDay);
   const currentWeek = Math.min(4, Math.ceil(state.currentDay / 7));
 
-  // Daily Score %
   const calculateDayScore = (d) => {
     if (!d) return 0;
     let score = 0;
@@ -462,7 +355,6 @@ export default function App() {
 
   const todayScore = calculateDayScore(currentDayData);
 
-  // Latest Scale Weight
   const latestWeight = useMemo(() => {
     const checkDays = [30, 28, 21, 14, 7];
     for (const d of checkDays) {
@@ -472,7 +364,6 @@ export default function App() {
     return parseFloat(state.profile.startWeight);
   }, [state.milestones, state.profile.startWeight]);
 
-  // Adaptive Diagnostic Flags
   const adaptiveAlerts = useMemo(() => {
     const alerts = [];
     const w1 = parseFloat(state.milestones[7]?.weight);
@@ -584,7 +475,7 @@ export default function App() {
     }));
   };
 
-// Google Sign-In Handler (Supabase)
+  // Google Sign-In Handler
   const handleGoogleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -594,17 +485,18 @@ export default function App() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err) {
       console.error("Google sign-in error:", err);
-      showToast("เข้าสู่ระบบไม่สำเร็จ: " + (err.message || ""));
+      showToast("เข้าสู่ระบบไม่สำเร็จ: " + (err?.message || ""));
     }
   };
 
-  // Sign out Handler (Supabase)
+  // Sign out Handler
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
+      setSyncStatus('offline');
       showToast("ออกจากระบบแล้ว");
       setShowAccountModal(false);
     } catch (e) {
@@ -629,13 +521,14 @@ export default function App() {
     );
   }
 
-  // Daily Totals
   const consumedCalories =
     (Number(currentDayData.meals.lunch.calories) || 0) +
     (Number(currentDayData.meals.dinner.calories) || 0);
   const consumedProtein =
     (Number(currentDayData.meals.lunch.protein) || 0) +
     (Number(currentDayData.meals.dinner.protein) || 0);
+
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans pb-24 md:pb-12 selection:bg-emerald-500 selection:text-zinc-950">
@@ -650,7 +543,6 @@ export default function App() {
       {/* TOP COMMAND HEADER */}
       <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-          {/* Logo & Protocol Title */}
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-950/40 shrink-0">
               <Flame className="w-5 h-5 text-zinc-950 stroke-[2.5]" />
@@ -670,9 +562,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Sync & Account Controls */}
           <div className="flex items-center gap-2">
-            {/* Realtime Cloud Sync Status Indicator */}
             <button
               onClick={() => setShowAccountModal(true)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${
@@ -698,17 +588,16 @@ export default function App() {
               </span>
             </button>
 
-            {/* Profile Avatar / Settings Trigger */}
             <button
               onClick={() => setShowAccountModal(true)}
-              className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 flex items-center justify-center text-zinc-300 transition"
+              className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 flex items-center justify-center text-zinc-300 transition overflow-hidden"
               title="User Account & Cloud Sync"
             >
-              {user?.photoURL ? (
+              {avatarUrl ? (
                 <img
-                  src={user.photoURL}
+                  src={avatarUrl}
                   alt="Avatar"
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <User className="w-4 h-4" />
@@ -718,7 +607,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* HORIZONTAL DAY SCRUBBER (Mobile Friendly) */}
+      {/* HORIZONTAL DAY SCRUBBER */}
       <div className="bg-zinc-900/60 border-b border-zinc-800/80 px-4 py-2 sticky top-[57px] z-30 backdrop-blur-md">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           <button
@@ -729,7 +618,6 @@ export default function App() {
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {/* Quick 7-Day Window View centered around current day */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
             {Array.from({ length: 30 }, (_, i) => i + 1)
               .filter(
@@ -800,7 +688,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MAIN CONTENT ROUTER VIA ACTIVE TAB */}
+      {/* MAIN CONTENT */}
       <main className="max-w-4xl mx-auto px-4 pt-4">
         {activeTab === 'today' && (
           <TodayTab
@@ -901,7 +789,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* QUICK PRESETS MODAL */}
+      {/* MODALS */}
       {presetModalTarget && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
@@ -950,7 +838,6 @@ export default function App() {
         </div>
       )}
 
-      {/* MILESTONE WEIGH-IN & ADAPTIVE MODAL */}
       {activeMilestoneModal && (
         <MilestoneModal
           day={activeMilestoneModal}
@@ -965,7 +852,6 @@ export default function App() {
         />
       )}
 
-      {/* ACCOUNT & CLOUD SYNC MODAL */}
       {showAccountModal && (
         <AccountModal
           user={user}
@@ -977,7 +863,6 @@ export default function App() {
         />
       )}
 
-      {/* PROTOCOL RESET MODAL */}
       {confirmResetModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 space-y-4">
@@ -1037,7 +922,6 @@ function TodayTab({
 
   return (
     <div className="space-y-4">
-      {/* DAILY DISCIPLINE HERO CARD */}
       <div className="bg-gradient-to-br from-zinc-900 to-zinc-900/90 border border-zinc-800 rounded-3xl p-5 shadow-xl">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -1062,7 +946,6 @@ function TodayTab({
             </p>
           </div>
 
-          {/* Radial Score Indicator */}
           <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
             <svg className="w-full h-full -rotate-90">
               <circle
@@ -1090,7 +973,6 @@ function TodayTab({
           </div>
         </div>
 
-        {/* METABOLIC BUDGET COMPARISON BAR */}
         <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-zinc-800/80">
           <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-2xl p-3">
             <div className="flex justify-between text-[11px] font-bold text-zinc-400 mb-1">
@@ -1132,7 +1014,7 @@ function TodayTab({
         </div>
       </div>
 
-      {/* 2-MEAL FASTING MODULE (LUNCH & DINNER) */}
+      {/* 2-MEAL MODULE */}
       <div className="space-y-3">
         {(['lunch', 'dinner']).map((mealKey) => {
           const meal = dayData.meals[mealKey];
@@ -1207,7 +1089,6 @@ function TodayTab({
                 </div>
               </div>
 
-              {/* Tag Badges */}
               <div className="flex flex-wrap gap-1.5">
                 {MEAL_TAGS.map((t) => {
                   const active = (meal.tags || []).includes(t);
@@ -1232,7 +1113,7 @@ function TodayTab({
         })}
       </div>
 
-      {/* LIQUID INTAKE & STRICT ZERO LIQUID SUGAR REMINDER */}
+      {/* LIQUID INTAKE */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -1276,7 +1157,6 @@ function TodayTab({
           </button>
         </div>
 
-        {/* Strict Zero Liquid Sugar Guard */}
         <div className="rounded-2xl bg-rose-950/30 border border-rose-500/40 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -1303,7 +1183,7 @@ function TodayTab({
         </div>
       </div>
 
-      {/* ACTIVITY & STEP TIER PROGRESS RING */}
+      {/* NEAT STEPS */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -1346,7 +1226,7 @@ function TodayTab({
         </div>
       </div>
 
-      {/* WEEKLY STRENGTH MAINTENANCE & ZONE 2 CARDIO */}
+      {/* STRENGTH SESSIONS & ZONE 2 */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -1380,7 +1260,6 @@ function TodayTab({
           ))}
         </div>
 
-        {/* Zone 2 Walking Minutes */}
         <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <HeartPulse className="w-4 h-4 text-sky-400" />
@@ -1556,6 +1435,9 @@ function ProfileTab({
   onOpenAccount,
   onResetAll
 }) {
+  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'Logged In User';
+  const userId = user?.id || 'Not connected';
+
   return (
     <div className="space-y-4">
       {/* Account Cloud Status Card */}
@@ -1567,10 +1449,10 @@ function ProfileTab({
             </div>
             <div>
               <div className="text-xs font-black text-white">
-                {user?.isAnonymous ? 'Anonymous Device Session' : user?.displayName || user?.email || 'Logged In User'}
+                {user ? displayName : 'Guest Session (Offline)'}
               </div>
               <div className="text-[10px] text-zinc-400 font-mono truncate max-w-[200px]">
-                UID: {user?.uid || 'Not connected'}
+                UID: {userId}
               </div>
             </div>
           </div>
@@ -1584,7 +1466,7 @@ function ProfileTab({
 
         <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between">
           <span className="text-zinc-400">Cloud Sync Status:</span>
-          <span className={`font-bold uppercase ${syncStatus === 'synced' ? 'text-emerald-400' : 'text-amber-400'}`}>
+          <span className={`font-bold uppercase ${syncStatus === 'synced' ? 'text-emerald-400' : syncStatus === 'saving' ? 'text-amber-400' : 'text-zinc-500'}`}>
             {syncStatus}
           </span>
         </div>
@@ -1693,7 +1575,6 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
           </button>
         </div>
 
-        {/* Weight Input */}
         <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
           <label className="text-[10px] font-black uppercase text-zinc-400">
             Morning Fasted Scale Weight (kg)
@@ -1715,7 +1596,6 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
           </div>
         </div>
 
-        {/* Adaptive Rules */}
         {day === 7 && loss !== null && (
           <div className="text-xs p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-amber-200">
             {loss < 1.0 ? (
@@ -1778,10 +1658,11 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
 // --- SUBCOMPONENT: ACCOUNT & CLOUD MODAL ---
 function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignOut, onClose }) {
   const [copied, setCopied] = useState(false);
+  const userId = user?.id || '';
 
   const copyUid = () => {
-    if (user?.uid) {
-      navigator.clipboard.writeText(user.uid);
+    if (userId) {
+      navigator.clipboard.writeText(userId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -1803,7 +1684,9 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
         <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2 text-xs">
           <div className="flex justify-between items-center text-zinc-400">
             <span>Sync Status:</span>
-            <span className="font-bold text-emerald-400 uppercase">{syncStatus}</span>
+            <span className={`font-bold uppercase ${syncStatus === 'synced' ? 'text-emerald-400' : syncStatus === 'saving' ? 'text-amber-400' : 'text-zinc-500'}`}>
+              {syncStatus}
+            </span>
           </div>
           <div className="flex justify-between items-center text-zinc-400">
             <span>Last Cloud Write:</span>
@@ -1813,47 +1696,49 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
           <div className="pt-2 border-t border-zinc-800 space-y-1">
             <span className="text-[10px] font-bold text-zinc-500 uppercase">User ID:</span>
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 font-mono text-[11px] text-zinc-300 break-all">
-              <span className="truncate">{user?.uid || 'Not Initialized'}</span>
-              <button onClick={copyUid} className="shrink-0 text-zinc-400 hover:text-white" title="Copy UID">
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
+              <span className="truncate">{userId || 'Not Initialized'}</span>
+              {userId && (
+                <button onClick={copyUid} className="shrink-0 text-zinc-400 hover:text-white" title="Copy UID">
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         {!user ? (
-            <button
-              onClick={onGoogleSignIn}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold shadow-md transition active:scale-[0.98]"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              Sign in with Google
-            </button>
-          ) : (
-            <button
-              onClick={onSignOut}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-800 hover:bg-red-950/40 text-zinc-300 hover:text-red-400 border border-zinc-700/50 hover:border-red-800/50 font-medium transition"
-            >
-              <LogOut className="w-4 h-4" /> Sign Out
-            </button>
-          )}
+          <button
+            onClick={onGoogleSignIn}
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold shadow-md transition active:scale-[0.98]"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            Sign in with Google
+          </button>
+        ) : (
+          <button
+            onClick={onSignOut}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-800 hover:bg-red-950/40 text-zinc-300 hover:text-red-400 border border-zinc-700/50 hover:border-red-800/50 font-medium transition"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        )}
       </div>
     </div>
   );
@@ -2014,7 +1899,6 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Calculated Summary Preview */}
           <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 grid grid-cols-2 gap-2 text-center text-xs">
             <div>
               <span className="text-[10px] text-zinc-500">Daily Intake (-700 kcal)</span>
