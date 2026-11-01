@@ -1,0 +1,24 @@
+import React from 'react';
+
+export const metadata = {
+  title: '30-Day Emergency Fat Loss Tracker',
+  description: 'Aggressive 4-week body recomposition protocol',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="th" className="dark">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body className="bg-zinc-950 text-zinc-100 antialiased min-h-screen">
+        {children}
+      </body>
+    </html>
+  );
+}
