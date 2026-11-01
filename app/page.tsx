@@ -5,22 +5,11 @@ declare const __firebase_config: any;
 declare const __app_id: any;
 declare const __initial_auth_token: any;
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  signInAnonymously,
-  signInWithCustomToken,
-  onAuthStateChanged,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  onSnapshot
-} from 'firebase/firestore';
+// @ts-nocheck
+'use client';
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import {
   Flame,
   Dumbbell,
@@ -40,23 +29,17 @@ import {
   Utensils,
   ShieldAlert,
   Clock,
-  HeartPulse,
-  RotateCcw,
-  Check,
-  BookOpen,
-  X,
-  Zap,
-  Cloud,
-  RefreshCw,
-  LogOut,
-  LogIn,
   User,
+  LogOut,
+  RefreshCw,
   Copy,
-  Smartphone,
-  ShieldCheck,
-  TrendingDown
+  Check
 } from 'lucide-react';
 
+// เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ddaofydnexklkxclwuqc.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 // --- FIREBASE CONFIGURATION & INITIALIZATION ---
 const firebaseConfig = typeof __firebase_config !== 'undefined'
   ? JSON.parse(__firebase_config)
