@@ -60,66 +60,66 @@ const supabaseUrl = 'https://ddaofydnexklkxclwuqc.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkYW9meWRuZXhrbGt4Y2x3dXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjU2MjQsImV4cCI6MjEwOTEwMTYyNH0.3Abkj_ZhUOnaL9m-3RuuD2Xz6Mi3fpLgTyfbsYghO6M';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// --- HIGH VOLUME / LEAN PROTEIN PRESETS ---
+// --- เมนูอาหารแนะนำโปรตีนสูง & อิ่มนาน ---
 const MEAL_PRESETS = [
   {
     id: 'p1',
-    name: '200g Boiled Chicken Breast + 150g Rice + Steamed Broccoli',
+    name: 'อกไก่ต้ม 200g + ข้าวสวย 150g + บรอกโคลีนึ่ง',
     calories: 440,
     protein: 52,
-    tags: ['Zero Oil / Water Sautéed', 'High Volume Greens', 'Protein Base']
+    tags: ['ผัดน้ำ / ปลอดน้ำมัน', 'ผักไฟเบอร์สูงคุมหิว', 'เน้นโปรตีนลีน']
   },
   {
     id: 'p2',
-    name: '50g Rolled Oats (Water Base) + 2 Scoops Whey Isolate',
+    name: 'ข้าวโอ๊ต 50g (ชงน้ำเปล่า) + เวย์ไอโซเลท 2 สกู๊ป',
     calories: 420,
     protein: 55,
-    tags: ['Zero Oil / Water Sautéed', 'Protein Base']
+    tags: ['ผัดน้ำ / ปลอดน้ำมัน', 'เน้นโปรตีนลีน']
   },
   {
     id: 'p3',
-    name: '250g Lean Cod / Tilapia + Giant Asparagus & Spinach Salad',
+    name: 'ปลากะพง/ปลานิลลีน 250g + สลัดหน่อไม้ฝรั่ง & ผักโขม',
     calories: 320,
     protein: 56,
-    tags: ['Zero Oil / Water Sautéed', 'High Volume Greens', 'Protein Base']
+    tags: ['ผัดน้ำ / ปลอดน้ำมัน', 'ผักไฟเบอร์สูงคุมหิว', 'เน้นโปรตีนลีน']
   },
   {
     id: 'p4',
-    name: '6 Egg Whites + 2 Whole Eggs Scramble + 200g Zucchini',
+    name: 'ไข่ขาว 6 ฟอง + ไข่เต็มใบ 2 ฟองคั่ว + ซูกินี 200g',
     calories: 300,
     protein: 38,
-    tags: ['Zero Oil / Water Sautéed', 'High Volume Greens', 'Protein Base']
+    tags: ['ผัดน้ำ / ปลอดน้ำมัน', 'ผักไฟเบอร์สูงคุมหิว', 'เน้นโปรตีนลีน']
   },
   {
     id: 'p5',
-    name: '220g 96/4 Lean Ground Beef + 300g Cauliflower Rice',
+    name: 'เนื้อบดไม่ติดมัน (96/4) 220g + ข้าวกะหล่ำดอก 300g',
     calories: 390,
     protein: 50,
-    tags: ['Zero Oil / Water Sautéed', 'High Volume Greens', 'Protein Base']
+    tags: ['ผัดน้ำ / ปลอดน้ำมัน', 'ผักไฟเบอร์สูงคุมหิว', 'เน้นโปรตีนลีน']
   },
   {
     id: 'p6',
-    name: '350g 0% Greek Yogurt + 1 Scoop Whey + 100g Fresh Berries',
+    name: 'กรีกโยเกิร์ต 0% 350g + เวย์ 1 สกู๊ป + เบอร์รี่สด 100g',
     calories: 360,
     protein: 58,
-    tags: ['Protein Base']
+    tags: ['เน้นโปรตีนลีน']
   }
 ];
 
 const MEAL_TAGS = [
-  'Zero Oil / Water Sautéed',
-  'High Volume Greens',
-  'Protein Base'
+  'ผัดน้ำ / ปลอดน้ำมัน',
+  'ผักไฟเบอร์สูงคุมหิว',
+  'เน้นโปรตีนลีน'
 ];
 
 const ACTIVITY_MULTIPLIERS = {
-  sedentary: { label: 'Sedentary (Desk Job, <5k steps)', factor: 1.2 },
-  light: { label: 'Lightly Active (1-3 gym workouts/wk)', factor: 1.375 },
-  moderate: { label: 'Moderately Active (3-5 sessions + 10k steps)', factor: 1.55 },
-  active: { label: 'Very Active (Hard lifting + 15k+ daily steps)', factor: 1.725 }
+  sedentary: { label: 'นั่งทำงานเป็นหลัก (ขยับน้อย, <5,000 ก้าว)', factor: 1.2 },
+  light: { label: 'ขยับปานกลาง (เวทเทรนนิ่ง 1-3 วัน/สัปดาห์)', factor: 1.375 },
+  moderate: { label: 'แอคทีฟ (เวท 3-5 วัน + เดิน 10,000 ก้าว)', factor: 1.55 },
+  active: { label: 'แอคทีฟสูงมาก (ซ้อมหนัก + เดิน 15,000+ ก้าว)', factor: 1.725 }
 };
 
-// --- PROTOCOL STATE BUILDER ---
+// --- ตัวสร้างโครงสร้างข้อมูลเริ่มต้น ---
 const createEmptyDay = (dayNum) => ({
   day: dayNum,
   meals: {
@@ -169,7 +169,7 @@ export default function App() {
   // --- AUTH & SYNC STATE ---
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [syncStatus, setSyncStatus] = useState('offline'); // 'synced' | 'saving' | 'offline' | 'error'
+  const [syncStatus, setSyncStatus] = useState('offline');
   const [syncTimestamp, setSyncTimestamp] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -198,7 +198,7 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // --- 1. SUPABASE AUTH LISTENER ---
+  // --- 1. ตรวจจับการเข้าสู่ระบบผ่าน SUPABASE ---
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -212,7 +212,6 @@ export default function App() {
       if (session?.user) {
         setUser(session.user);
         setSyncStatus('synced');
-        // ล้าง token บนแถบ URL ออกให้อ่านง่ายขึ้น
         if (window.location.hash.includes('access_token')) {
           window.history.replaceState(null, '', window.location.pathname);
         }
@@ -246,7 +245,6 @@ export default function App() {
           setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
           showToast('ซิงก์ข้อมูลจากระบบคลาวด์เรียบร้อย');
         } else {
-          // หากเป็นผู้ใช้ใหม่ ให้บันทึกข้อมูลตั้งต้นขึ้น Cloud
           await supabase.from('user_tracker').upsert({
             user_id: user.id,
             tracker_data: state,
@@ -301,7 +299,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [state, user]);
 
-  // ฟังก์ชันอัปเดต state ภายในเครื่อง
   const saveState = (updater) => {
     setState((prevState) => {
       const nextState = typeof updater === 'function' ? updater(prevState) : updater;
@@ -314,7 +311,7 @@ export default function App() {
     });
   };
 
-  // --- METABOLIC TARGETS (Mifflin-St Jeor) ---
+  // --- คำนวณเป้าหมายตามสูตร Mifflin-St Jeor ---
   const metrics = useMemo(() => {
     const { age, gender, height, startWeight, targetWeight, activityLevel } = state.profile;
     const w = parseFloat(startWeight) || 75;
@@ -364,6 +361,7 @@ export default function App() {
     return parseFloat(state.profile.startWeight);
   }, [state.milestones, state.profile.startWeight]);
 
+  // ระบบแจ้งเตือนอัจฉริยะ (Adaptive Feedback)
   const adaptiveAlerts = useMemo(() => {
     const alerts = [];
     const w1 = parseFloat(state.milestones[7]?.weight);
@@ -375,8 +373,8 @@ export default function App() {
         alerts.push({
           id: 'w1-steps',
           type: 'amber',
-          title: 'Week 1 Adaptive Trigger: +2,500 Steps Escalation',
-          desc: `Weight drop was ${drop.toFixed(1)}kg (< 1.0kg target). DO NOT lower food calories further. Preserve your metabolic rate by increasing daily steps to 12,500-15,000 to expand the deficit through NEAT.`
+          title: 'สัปดาห์ที่ 1: ปรับเพิ่มก้าวเดิน +2,500 ก้าว',
+          desc: `น้ำหนักลดลง ${drop.toFixed(1)} กก. (ต่ำกว่าเป้าหมาย 1.0 กก.) ห้ามลดแคลอรีจากอาหารลงอีก เพื่อรักษาระบบเผาผลาญ ให้เพิ่มการเดินเป็น 12,500 - 15,000 ก้าวต่อวัน เพื่อเพิ่มการเผาผลาญผ่าน NEAT แทน`
         });
       }
     }
@@ -385,8 +383,8 @@ export default function App() {
       alerts.push({
         id: 'w3-cortisol',
         type: 'rose',
-        title: 'Week 3 CNS & Cortisol Stabilizer Triggered',
-        desc: 'Sleep disruption / severe fatigue detected. Hold your current calorie floor and step count steady. Shift dinner carbs slightly higher to replenish serotonin and support sleep architecture.'
+        title: 'สัปดาห์ที่ 3: ระบบแจ้งเตือนภาวะเครียดและคอร์ติซอลสูง',
+        desc: 'ตรวจพบอาการนอนไม่หลับหรืออ่อนเพลียสะสม แนะนำให้คงแคลอรีและจำนวนก้าวไว้เท่าเดิม และย้ายคาร์โบไฮเดรตเชิงซ้อนมาไว้ในมื้อเย็นเพื่อช่วยฟื้นฟูเซโรโทนินและช่วยให้นอนหลับลึกขึ้น'
       });
     }
 
@@ -447,7 +445,7 @@ export default function App() {
       }
     }));
     setPresetModalTarget(null);
-    showToast(`Applied preset to ${mealKey === 'lunch' ? 'Lunch' : 'Dinner'}`);
+    showToast(`เลือกเมนูอาหารสำหรับ${mealKey === 'lunch' ? 'มื้อเที่ยง' : 'มื้อเย็น'}เรียบร้อย`);
   };
 
   const toggleStrengthDay = (weekNum, sessionIdx) => {
@@ -475,7 +473,7 @@ export default function App() {
     }));
   };
 
-  // Google Sign-In Handler
+  // จัดการ Google Login
   const handleGoogleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -491,7 +489,7 @@ export default function App() {
     }
   };
 
-  // Sign out Handler
+  // ออกจากระบบ
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -504,7 +502,7 @@ export default function App() {
     }
   };
 
-  // ONBOARDING SCREEN
+  // หน้าจอ Onboarding / คำนวณเป้าหมาย
   if (!state.onboarded || showProfileModal) {
     return (
       <OnboardingModal
@@ -515,7 +513,7 @@ export default function App() {
         onSave={(newProfile) => {
           saveState((prev) => ({ ...prev, onboarded: true, profile: newProfile }));
           setShowProfileModal(false);
-          showToast("Profile & Metabolic Targets updated.");
+          showToast("อัปเดตข้อมูลและเป้าหมายเรียบร้อย");
         }}
       />
     );
@@ -532,7 +530,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans pb-24 md:pb-12 selection:bg-emerald-500 selection:text-zinc-950">
-      {/* TOAST POPUP */}
+      {/* ป๊อปอัปแจ้งเตือน */}
       {toastMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-zinc-950 px-4 py-2 rounded-full text-xs font-black shadow-xl flex items-center gap-2 animate-bounce">
           <CheckCircle2 className="w-4 h-4" />
@@ -540,7 +538,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TOP COMMAND HEADER */}
+      {/* แถบด้านบน */}
       <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -557,7 +555,7 @@ export default function App() {
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 truncate max-w-[200px] sm:max-w-none">
-                Aggressive Body Recomp • 4-Week Lean Mass Armor
+                โปรแกรมลดไขมันเร่งด่วน • ป้องกันการสูญเสียกล้ามเนื้อ 4 สัปดาห์
               </p>
             </div>
           </div>
@@ -572,7 +570,7 @@ export default function App() {
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
                   : 'bg-zinc-900 border-zinc-800 text-zinc-400'
               }`}
-              title="Click to view Account & Cloud Sync details"
+              title="ดูรายละเอียดบัญชีและการเชื่อมต่อ Cloud"
             >
               {syncStatus === 'saving' ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -581,17 +579,17 @@ export default function App() {
               )}
               <span className="hidden sm:inline">
                 {syncStatus === 'synced'
-                  ? `Synced ${syncTimestamp || ''}`
+                  ? `ซิงก์แล้ว ${syncTimestamp || ''}`
                   : syncStatus === 'saving'
-                  ? 'Syncing...'
-                  : 'Local Only'}
+                  ? 'กำลังซิงก์...'
+                  : 'ออฟไลน์ (ในเครื่อง)'}
               </span>
             </button>
 
             <button
               onClick={() => setShowAccountModal(true)}
               className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 flex items-center justify-center text-zinc-300 transition overflow-hidden"
-              title="User Account & Cloud Sync"
+              title="บัญชีผู้ใช้และการซิงก์"
             >
               {avatarUrl ? (
                 <img
@@ -607,7 +605,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* HORIZONTAL DAY SCRUBBER */}
+      {/* แถบเลือกวันเลื่อนซ้ายขวา */}
       <div className="bg-zinc-900/60 border-b border-zinc-800/80 px-4 py-2 sticky top-[57px] z-30 backdrop-blur-md">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           <button
@@ -662,7 +660,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* ADAPTIVE FEEDBACK NOTICES */}
+      {/* แจ้งเตือนข้อเสนอแนะอัจฉริยะ */}
       {adaptiveAlerts.length > 0 && (
         <div className="max-w-4xl mx-auto px-4 pt-4 space-y-2.5">
           {adaptiveAlerts.map((a) => (
@@ -688,7 +686,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MAIN CONTENT */}
+      {/* ส่วนเนื้อหาหลักตามแท็บ */}
       <main className="max-w-4xl mx-auto px-4 pt-4">
         {activeTab === 'today' && (
           <TodayTab
@@ -744,7 +742,7 @@ export default function App() {
         )}
       </main>
 
-      {/* BOTTOM MOBILE NAVIGATION BAR */}
+      {/* แถบเมนูด้านล่างสำหรับมือถือ */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800/90 py-2 px-6">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <button
@@ -754,7 +752,7 @@ export default function App() {
             }`}
           >
             <Flame className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Today</span>
+            <span className="text-[10px] tracking-tight">วันนี้</span>
           </button>
 
           <button
@@ -764,7 +762,7 @@ export default function App() {
             }`}
           >
             <Calendar className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">30-Day Grid</span>
+            <span className="text-[10px] tracking-tight">ตาราง 30 วัน</span>
           </button>
 
           <button
@@ -774,7 +772,7 @@ export default function App() {
             }`}
           >
             <Award className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Milestones</span>
+            <span className="text-[10px] tracking-tight">เป้าหมาย & ชั่งนน.</span>
           </button>
 
           <button
@@ -784,12 +782,12 @@ export default function App() {
             }`}
           >
             <Settings className="w-5 h-5" />
-            <span className="text-[10px] tracking-tight">Profile & Sync</span>
+            <span className="text-[10px] tracking-tight">โปรไฟล์ & ซิงก์</span>
           </button>
         </div>
       </nav>
 
-      {/* MODALS */}
+      {/* โมดอลเลือกเมนูแนะนำ */}
       {presetModalTarget && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
@@ -797,7 +795,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-emerald-400" />
                 <h3 className="font-black text-white text-base">
-                  Approved High-Satiety Meals ({presetModalTarget.toUpperCase()})
+                  เมนูโปรตีนสูงคุมหิวยอดนิยม ({presetModalTarget === 'lunch' ? 'มื้อเที่ยง' : 'มื้อเย็น'})
                 </h3>
               </div>
               <button
@@ -808,7 +806,7 @@ export default function App() {
               </button>
             </div>
             <p className="text-xs text-zinc-400">
-              One-tap meal population with verified lean protein & zero-oil standards:
+              แตะเพื่อเลือกเมนูที่ผ่านเกณฑ์โปรตีนลีนสูงและไม่ใช้น้ำมันทันที:
             </p>
             <div className="space-y-2">
               {MEAL_PRESETS.map((p) => (
@@ -829,7 +827,7 @@ export default function App() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-xs font-black text-amber-400">{p.calories} kcal</div>
-                    <div className="text-xs font-bold text-emerald-400">{p.protein}g Protein</div>
+                    <div className="text-xs font-bold text-emerald-400">{p.protein}g โปรตีน</div>
                   </div>
                 </button>
               ))}
@@ -838,6 +836,7 @@ export default function App() {
         </div>
       )}
 
+      {/* โมดอลชั่งน้ำหนักตามรอบ */}
       {activeMilestoneModal && (
         <MilestoneModal
           day={activeMilestoneModal}
@@ -847,11 +846,12 @@ export default function App() {
           onClose={() => setActiveMilestoneModal(null)}
           onSave={(field, val) => {
             updateMilestone(activeMilestoneModal, field, val);
-            showToast(`Day ${activeMilestoneModal} weigh-in saved`);
+            showToast(`บันทึกน้ำหนักวันที่ ${activeMilestoneModal} เรียบร้อย`);
           }}
         />
       )}
 
+      {/* โมดอลจัดการบัญชี & CLOUD */}
       {showAccountModal && (
         <AccountModal
           user={user}
@@ -863,22 +863,23 @@ export default function App() {
         />
       )}
 
+      {/* โมดอลยืนยันการรีเซ็ต */}
       {confirmResetModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 space-y-4">
             <div className="flex items-center gap-2.5 text-rose-400">
               <AlertTriangle className="w-5 h-5 shrink-0" />
-              <h3 className="font-bold text-white text-base">Reset 30-Day Protocol?</h3>
+              <h3 className="font-bold text-white text-base">ต้องการรีเซ็ตโปรแกรม 30 วันหรือไม่?</h3>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              This will reset all logged meals, steps, and weigh-ins back to Day 1 across all connected devices.
+              การดำเนินการนี้จะล้างข้อมูลมื้ออาหาร จำนวนก้าว และน้ำหนักทั้งหมดกลับไปเริ่มต้นวันที่ 1 ในทุกอุปกรณ์ที่เชื่อมต่อ
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setConfirmResetModal(false)}
                 className="px-3.5 py-2 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300"
               >
-                Cancel
+                ยกเลิก
               </button>
               <button
                 onClick={() => {
@@ -887,11 +888,11 @@ export default function App() {
                   fresh.profile = state.profile;
                   saveState(fresh);
                   setConfirmResetModal(false);
-                  showToast("30-Day Protocol reset to Day 1");
+                  showToast("รีเซ็ตโปรแกรมกลับสู่วันที่ 1 เรียบร้อย");
                 }}
                 className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-zinc-950 text-xs font-black"
               >
-                Reset Everything
+                ยืนยันรีเซ็ตข้อมูลทั้งหมด
               </button>
             </div>
           </div>
@@ -901,7 +902,7 @@ export default function App() {
   );
 }
 
-// --- SUB-VIEW: TAB 1 (TODAY DASHBOARD) ---
+// --- แดชบอร์ดบันทึกประจำวัน (TODAY) ---
 function TodayTab({
   currentDay,
   currentWeek,
@@ -922,27 +923,28 @@ function TodayTab({
 
   return (
     <div className="space-y-4">
+      {/* การ์ดสรุปเป้าหมายประจำวัน */}
       <div className="bg-gradient-to-br from-zinc-900 to-zinc-900/90 border border-zinc-800 rounded-3xl p-5 shadow-xl">
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                DAY {currentDay}
+                วันที่ {currentDay}
               </span>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                Week {currentWeek}
+                สัปดาห์ที่ {currentWeek}
               </span>
               {isMilestoneDay && (
                 <button
                   onClick={openMilestone}
                   className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500 text-zinc-950 flex items-center gap-1 animate-pulse"
                 >
-                  <Scale className="w-3 h-3" /> Weigh-In Due
+                  <Scale className="w-3 h-3" /> ถึงรอบชั่งน้ำหนัก
                 </button>
               )}
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Strict 16:8 Fasting • 2 Lean Feedings • High NEAT Steps
+              ทำ Fasting 16:8 เคร่งครัด • ทาน 2 มื้อโปรตีนลีน • เพิ่มก้าวเดิน NEAT
             </p>
           </div>
 
@@ -973,12 +975,13 @@ function TodayTab({
           </div>
         </div>
 
+        {/* แถบวัดพลังงานและโปรตีน */}
         <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-zinc-800/80">
           <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-2xl p-3">
             <div className="flex justify-between text-[11px] font-bold text-zinc-400 mb-1">
-              <span>Energy Limit</span>
+              <span>โควตาพลังงาน</span>
               <span className={consumedCalories > metrics.dailyCalories ? 'text-rose-400' : 'text-emerald-400'}>
-                {metrics.dailyCalories - consumedCalories} left
+                {metrics.dailyCalories - consumedCalories} เหลือ
               </span>
             </div>
             <div className="text-lg font-black text-white">
@@ -995,7 +998,7 @@ function TodayTab({
 
           <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-2xl p-3">
             <div className="flex justify-between text-[11px] font-bold text-zinc-400 mb-1">
-              <span>Protein Target</span>
+              <span>เป้าหมายโปรตีน</span>
               <span className="text-emerald-400">
                 {Math.round((consumedProtein / metrics.proteinTarget) * 100)}%
               </span>
@@ -1014,12 +1017,12 @@ function TodayTab({
         </div>
       </div>
 
-      {/* 2-MEAL MODULE */}
+      {/* บันทึกมื้ออาหาร 2 มื้อ */}
       <div className="space-y-3">
         {(['lunch', 'dinner']).map((mealKey) => {
           const meal = dayData.meals[mealKey];
           const isLunch = mealKey === 'lunch';
-          const title = isLunch ? 'Meal 1: Lunch (Fasting Break)' : 'Meal 2: Dinner (Final Feeding)';
+          const title = isLunch ? 'มื้อที่ 1: เที่ยง (เปิดมื้อแรก)' : 'มื้อที่ 2: เย็น (ปิดมื้อสุดท้าย)';
 
           return (
             <div
@@ -1049,20 +1052,20 @@ function TodayTab({
                   onClick={() => openPresetModal(mealKey)}
                   className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 hover:bg-emerald-500/25"
                 >
-                  <BookOpen className="w-3 h-3" /> Quick Presets
+                  <BookOpen className="w-3 h-3" /> เมนูแนะนำด่วน
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-3">
                 <input
                   type="text"
-                  placeholder="e.g., 200g Boiled Chicken + White Rice..."
+                  placeholder="เช่น อกไก่ต้ม 200g + ข้าวสวย 150g..."
                   value={meal.description}
                   onChange={(e) => handleMealField(mealKey, 'description', e.target.value)}
                   className="sm:col-span-6 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 outline-none focus:border-emerald-500"
                 />
                 <div className="sm:col-span-3 flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5">
-                  <span className="text-[10px] text-zinc-500 uppercase font-bold">Kcal:</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold">แคล:</span>
                   <input
                     type="number"
                     min="0"
@@ -1075,7 +1078,7 @@ function TodayTab({
                   />
                 </div>
                 <div className="sm:col-span-3 flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5">
-                  <span className="text-[10px] text-zinc-500 uppercase font-bold">Protein:</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold">โปรตีน:</span>
                   <input
                     type="number"
                     min="0"
@@ -1113,18 +1116,18 @@ function TodayTab({
         })}
       </div>
 
-      {/* LIQUID INTAKE */}
+      {/* ปริมาณน้ำดื่มและกฎงดน้ำตาล */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Droplets className="w-5 h-5 text-sky-400" />
             <div>
-              <h4 className="text-xs font-black uppercase text-white">Hydration & Electrolytes</h4>
-              <p className="text-[10px] text-zinc-400">Target: 3,000ml (3.0L) daily to blunt ghrelin</p>
+              <h4 className="text-xs font-black uppercase text-white">ปริมาณน้ำดื่ม & เกลือแร่</h4>
+              <p className="text-[10px] text-zinc-400">เป้าหมาย: 3,000 มล. (3 ลิตร) ต่อวัน เพื่อลดฮอร์โมนความหิว</p>
             </div>
           </div>
           <div className="text-xs font-black text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2.5 py-1 rounded-xl">
-            {(dayData.waterMl || 0)} / 3000 ml
+            {(dayData.waterMl || 0)} / 3000 มล.
           </div>
         </div>
 
@@ -1137,7 +1140,7 @@ function TodayTab({
               }
               className="py-2 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-sky-500/40 text-xs font-bold text-sky-300 transition flex items-center justify-center gap-1"
             >
-              <Plus className="w-3 h-3" /> {vol}ml
+              <Plus className="w-3 h-3" /> {vol}มล.
             </button>
           ))}
         </div>
@@ -1147,13 +1150,13 @@ function TodayTab({
             onClick={() => updateCurrentDay((d) => ({ ...d, waterMl: Math.max(0, (d.waterMl || 0) - 250) }))}
             className="text-[10px] text-zinc-500 hover:text-zinc-300"
           >
-            -250ml Correction
+            -250 มล. (ปรับลด)
           </button>
           <button
             onClick={() => updateCurrentDay((d) => ({ ...d, waterMl: 0 }))}
             className="text-[10px] text-zinc-500 hover:text-rose-400"
           >
-            Clear Water
+            ล้างค่าน้ำ
           </button>
         </div>
 
@@ -1161,8 +1164,8 @@ function TodayTab({
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
             <div className="text-[11px] text-rose-200">
-              <span className="font-extrabold uppercase tracking-wide">Strict Zero Liquid Sugar: </span>
-              Water, Black Coffee, Unsweetened Tea & 0-Cal Sodas ONLY.
+              <span className="font-extrabold uppercase tracking-wide">งดเครื่องดื่มที่มีน้ำตาลเด็ดขาด: </span>
+              ดื่มได้เฉพาะ น้ำเปล่า, กาแฟดำ, ชาไม่ใส่น้ำตาล และน้ำอัดลม 0 แคลอรี เท่านั้น
             </div>
           </div>
           <button
@@ -1178,19 +1181,19 @@ function TodayTab({
                 : 'bg-zinc-950 text-zinc-400 border-zinc-700'
             }`}
           >
-            {dayData.zeroLiquidSugarConfirmed ? '✓ Zero Sugar Verified' : 'Confirm 0 Liquid Sugar'}
+            {dayData.zeroLiquidSugarConfirmed ? '✓ ยืนยันปลอดน้ำตาลแล้ว' : 'กดยืนยันปลอดน้ำตาล'}
           </button>
         </div>
       </div>
 
-      {/* NEAT STEPS */}
+      {/* จำนวนก้าวเดิน NEAT */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Footprints className="w-5 h-5 text-emerald-400" />
             <div>
-              <h4 className="text-xs font-black uppercase text-white">NEAT Daily Steps</h4>
-              <p className="text-[10px] text-zinc-400">Primary Fat Oxidation Engine</p>
+              <h4 className="text-xs font-black uppercase text-white">จำนวนก้าวเดินประจำวัน (NEAT)</h4>
+              <p className="text-[10px] text-zinc-400">กลไกหลักในการดึงไขมันสะสมมาเผาผลาญ</p>
             </div>
           </div>
           <StepBadge steps={dayData.steps || 0} />
@@ -1215,34 +1218,34 @@ function TodayTab({
 
         <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
           <div className={`p-2 rounded-xl border ${dayData.steps >= 10000 ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 font-bold' : 'bg-zinc-950 border-zinc-800 text-zinc-500'}`}>
-            Min: 10,000
+            ขั้นต่ำ: 10,000
           </div>
           <div className={`p-2 rounded-xl border ${dayData.steps >= 15000 ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 font-bold' : 'bg-zinc-950 border-zinc-800 text-zinc-500'}`}>
-            Optimal: 15,000
+            เหมาะสม: 15,000
           </div>
           <div className={`p-2 rounded-xl border ${dayData.steps >= 20000 ? 'bg-purple-500/15 border-purple-500/40 text-purple-300 font-bold' : 'bg-zinc-950 border-zinc-800 text-zinc-500'}`}>
-            Elite: 20,000
+            ระดับสูง: 20,000
           </div>
         </div>
       </div>
 
-      {/* STRENGTH SESSIONS & ZONE 2 */}
+      {/* ตารางเวทเทรนนิ่ง & โซน 2 */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Dumbbell className="w-5 h-5 text-emerald-400" />
             <div>
-              <h4 className="text-xs font-black uppercase text-white">Week {currentWeek} Strength Armor</h4>
-              <p className="text-[10px] text-zinc-400">4 Heavy Resistance Sessions to Halt Catabolism</p>
+              <h4 className="text-xs font-black uppercase text-white">ตารางเวทเทรนนิ่ง สัปดาห์ที่ {currentWeek}</h4>
+              <p className="text-[10px] text-zinc-400">เวทหนัก 4 วันต่อสัปดาห์ เพื่อป้องกันการสูญเสียกล้ามเนื้อ</p>
             </div>
           </div>
           <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-            {weeklyStrength.filter(Boolean).length} / 4 Done
+            {weeklyStrength.filter(Boolean).length} / 4 วัน
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {['Session 1: Upper Push/Pull', 'Session 2: Lower Compound', 'Session 3: Upper Hypertrophy', 'Session 4: Lower & Core'].map((name, i) => (
+          {['วันที่ 1: อก / หลัง / แขน (Upper)', 'วันที่ 2: ขา / สะโพก (Lower)', 'วันที่ 3: ช่วงบนเน้นกระตุ้นกล้ามเนื้อ', 'วันที่ 4: ช่วงล่าง & แกนกลางลำตัว'].map((name, i) => (
             <button
               key={name}
               onClick={() => toggleStrengthDay(i)}
@@ -1263,7 +1266,7 @@ function TodayTab({
         <div className="pt-2 border-t border-zinc-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <HeartPulse className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-bold text-zinc-300">Zone 2 Cardio / Incline Walk</span>
+            <span className="text-xs font-bold text-zinc-300">คาร์ดิโอโซน 2 / เดินชันบนลู่วิ่ง</span>
           </div>
           <div className="flex items-center gap-1.5">
             <input
@@ -1280,28 +1283,28 @@ function TodayTab({
               }
               className="w-16 bg-zinc-950 border border-zinc-800 rounded-xl px-2 py-1 text-xs font-black text-white text-right outline-none"
             />
-            <span className="text-xs text-zinc-500">mins</span>
+            <span className="text-xs text-zinc-500">นาที</span>
           </div>
         </div>
 
         <p className="text-[10px] text-zinc-500 italic">
-          * Warning: Avoid exhaustive HIIT sessions. Zone 2 (120-135 BPM) protects muscle while accelerating deficit.
+          * คำแนะนำ: หลีกเลี่ยงคาร์ดิโอหนักจนหมดแรง (HIIT) โซน 2 (หัวใจ 120-135 BPM) จะช่วยเผาผลาญไขมันโดยไม่สลายกล้ามเนื้อ
         </p>
       </div>
     </div>
   );
 }
 
-// --- SUB-VIEW: TAB 2 (30-DAY GRID) ---
+// --- ตารางภาพรวม 30 วัน (GRID) ---
 function TimelineTab({ days, currentDay, milestones, onSelectDay }) {
   return (
     <div className="space-y-4">
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
         <h3 className="text-sm font-black text-white uppercase tracking-wider mb-1">
-          30-Day Master Protocol Timeline
+          ภาพรวมความสม่ำเสมอตลอด 30 วัน
         </h3>
         <p className="text-xs text-zinc-400 mb-4">
-          Tap any day to inspect meal logs, steps, and compliance scores.
+          แตะที่แต่ละวันเพื่อดูบันทึกมื้ออาหาร จำนวนก้าว และคะแนนวินัย
         </p>
 
         <div className="grid grid-cols-5 sm:grid-cols-6 gap-2.5">
@@ -1354,7 +1357,7 @@ function TimelineTab({ days, currentDay, milestones, onSelectDay }) {
   );
 }
 
-// --- SUB-VIEW: TAB 3 (MILESTONES & ADAPTIVE) ---
+// --- หน้ารอบชั่งน้ำหนัก & ปรับแผน (MILESTONES) ---
 function MilestonesTab({ milestones, profile, metrics, onOpenMilestone }) {
   const startW = parseFloat(profile.startWeight) || 80;
 
@@ -1362,10 +1365,10 @@ function MilestonesTab({ milestones, profile, metrics, onOpenMilestone }) {
     <div className="space-y-4">
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
         <h3 className="text-sm font-black text-white uppercase tracking-wider mb-1">
-          Weekly Weigh-Ins & Adaptive Intelligence
+          ชั่งน้ำหนักประจำสัปดาห์ & ปรับแผนอัจฉริยะ
         </h3>
         <p className="text-xs text-zinc-400 mb-4">
-          Fasted morning weigh-ins trigger automated protocol adjustments.
+          ชั่งน้ำหนักตอนเช้าหลังตื่นนอน (ก่อนทานอาหาร) เพื่อประเมินและปรับโปรแกรมอัตโนมัติ
         </p>
 
         <div className="space-y-3">
@@ -1382,30 +1385,30 @@ function MilestonesTab({ milestones, profile, metrics, onOpenMilestone }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black uppercase text-purple-400">
-                      Day {mDay} Check-In
+                      เช็กอินวันที่ {mDay}
                     </span>
                     {m?.completed && (
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.2 rounded-full font-bold">
-                        Logged
+                        บันทึกแล้ว
                       </span>
                     )}
                   </div>
                   <div className="text-base font-black text-white mt-0.5">
-                    {weightVal ? `${weightVal} kg` : 'Pending Weigh-In'}
+                    {weightVal ? `${weightVal} กก.` : 'รอชั่งน้ำหนัก'}
                     {drop !== null && (
                       <span className="text-xs font-normal text-emerald-400 ml-2">
-                        (-{drop} kg vs start)
+                        (ลดลง -{drop} กก. จากวันแรก)
                       </span>
                     )}
                   </div>
                   <p className="text-[10px] text-zinc-500 mt-0.5">
                     {mDay === 7
-                      ? 'Week 1 Loss Diagnostic'
+                      ? 'ประเมินผลลดไขมันสัปดาห์ที่ 1'
                       : mDay === 21
-                      ? 'Week 3 CNS & Cortisol Assessment'
+                      ? 'ประเมินความล้าสะสมและฮอร์โมนสัปดาห์ที่ 3'
                       : mDay === 30
-                      ? 'Exit Protocol & Reverse Diet'
-                      : `Week ${mDay / 7} Checkpoint`}
+                      ? 'แผนออกจากโปรแกรม & Reverse Diet'
+                      : `จุดประเมินสัปดาห์ที่ ${mDay / 7}`}
                   </p>
                 </div>
 
@@ -1413,7 +1416,7 @@ function MilestonesTab({ milestones, profile, metrics, onOpenMilestone }) {
                   onClick={() => onOpenMilestone(mDay)}
                   className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-bold transition"
                 >
-                  {m?.completed ? 'Update' : 'Log Weight'}
+                  {m?.completed ? 'แก้ไข' : 'บันทึกน้ำหนัก'}
                 </button>
               </div>
             );
@@ -1424,7 +1427,7 @@ function MilestonesTab({ milestones, profile, metrics, onOpenMilestone }) {
   );
 }
 
-// --- SUB-VIEW: TAB 4 (PROFILE & CLOUD SYNC) ---
+// --- หน้าโปรไฟล์ & การซิงก์ (PROFILE) ---
 function ProfileTab({
   profile,
   metrics,
@@ -1435,12 +1438,12 @@ function ProfileTab({
   onOpenAccount,
   onResetAll
 }) {
-  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'Logged In User';
-  const userId = user?.id || 'Not connected';
+  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'ผู้ใช้งาน';
+  const userId = user?.id || 'ยังไม่เชื่อมต่อ';
 
   return (
     <div className="space-y-4">
-      {/* Account Cloud Status Card */}
+      {/* การ์ดสถานะบัญชีและการซิงก์ */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -1449,7 +1452,7 @@ function ProfileTab({
             </div>
             <div>
               <div className="text-xs font-black text-white">
-                {user ? displayName : 'Guest Session (Offline)'}
+                {user ? displayName : 'ใช้งานแบบออฟไลน์ (ในเครื่อง)'}
               </div>
               <div className="text-[10px] text-zinc-400 font-mono truncate max-w-[200px]">
                 UID: {userId}
@@ -1460,101 +1463,101 @@ function ProfileTab({
             onClick={onOpenAccount}
             className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200"
           >
-            Manage
+            จัดการบัญชี
           </button>
         </div>
 
         <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between">
-          <span className="text-zinc-400">Cloud Sync Status:</span>
+          <span className="text-zinc-400">สถานะการเชื่อมต่อ Cloud:</span>
           <span className={`font-bold uppercase ${syncStatus === 'synced' ? 'text-emerald-400' : syncStatus === 'saving' ? 'text-amber-400' : 'text-zinc-500'}`}>
-            {syncStatus}
+            {syncStatus === 'synced' ? 'ซิงก์แล้ว' : syncStatus === 'saving' ? 'กำลังบันทึก...' : 'ออฟไลน์'}
           </span>
         </div>
       </div>
 
-      {/* Target Blueprint Card */}
+      {/* การ์ดเป้าหมายพลังงานและการเผาผลาญ */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-black uppercase text-white tracking-wider">
-            Metabolic Blueprint (Mifflin-St Jeor)
+            เป้าหมายพลังงานและการเผาผลาญ (Mifflin-St Jeor)
           </h4>
           <button
             onClick={onEditTargets}
             className="text-xs text-emerald-400 hover:underline font-bold"
           >
-            Recalculate
+            คำนวณใหม่
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-2.5 text-xs">
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-zinc-500 text-[10px] uppercase">Daily Calorie Target</span>
+            <span className="text-zinc-500 text-[10px] uppercase">แคลอรีที่ต้องทานต่อวัน</span>
             <div className="text-base font-black text-amber-400 mt-0.5">{metrics.dailyCalories} kcal</div>
             <span className="text-[10px] text-zinc-500">TDEE ({metrics.tdee}) - 700</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-zinc-500 text-[10px] uppercase">Daily Protein Target</span>
-            <div className="text-base font-black text-emerald-400 mt-0.5">{metrics.proteinTarget}g / day</div>
-            <span className="text-[10px] text-zinc-500">2.0g per kg BW</span>
+            <span className="text-zinc-500 text-[10px] uppercase">เป้าหมายโปรตีนต่อวัน</span>
+            <div className="text-base font-black text-emerald-400 mt-0.5">{metrics.proteinTarget}g / วัน</div>
+            <span className="text-[10px] text-zinc-500">2.0g ต่อน้ำหนักตัว 1 กก.</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-zinc-500 text-[10px] uppercase">Current Weight</span>
-            <div className="text-base font-black text-white mt-0.5">{latestWeight} kg</div>
+            <span className="text-zinc-500 text-[10px] uppercase">น้ำหนักล่าสุด</span>
+            <div className="text-base font-black text-white mt-0.5">{latestWeight} กก.</div>
           </div>
 
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-            <span className="text-zinc-500 text-[10px] uppercase">Target Goal</span>
-            <div className="text-base font-black text-emerald-400 mt-0.5">{profile.targetWeight} kg</div>
+            <span className="text-zinc-500 text-[10px] uppercase">น้ำหนักเป้าหมาย</span>
+            <div className="text-base font-black text-emerald-400 mt-0.5">{profile.targetWeight} กก.</div>
           </div>
         </div>
       </div>
 
-      {/* Reset Session Action */}
+      {/* ปุ่มรีเซ็ตโปรแกรม */}
       <div className="pt-2 flex justify-center">
         <button
           onClick={onResetAll}
           className="text-xs text-zinc-500 hover:text-rose-400 flex items-center gap-1.5 transition"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Reset Protocol from Day 1
+          <RotateCcw className="w-3.5 h-3.5" /> รีเซ็ตเริ่มโปรแกรมใหม่ตั้งแต่วันที่ 1
         </button>
       </div>
     </div>
   );
 }
 
-// --- SUBCOMPONENT: STEP BADGE ---
+// --- ป้ายสถิติจำนวนก้าว ---
 function StepBadge({ steps }) {
   if (steps >= 20000) {
     return (
       <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
-        ★ Elite (20k+)
+        ★ ระดับสูง (20k+)
       </span>
     );
   }
   if (steps >= 15000) {
     return (
       <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-        ✓ Optimal (15k+)
+        ✓ เหมาะสม (15k+)
       </span>
     );
   }
   if (steps >= 10000) {
     return (
       <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-        Min Baseline (10k+)
+        ขั้นต่ำ (10k+)
       </span>
     );
   }
   return (
     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500">
-      Below 10k Minimum
+      ต่ำกว่าเกณฑ์ 10k
     </span>
   );
 }
 
-// --- SUBCOMPONENT: MILESTONE MODAL ---
+// --- โมดอลเช็กอินน้ำหนัก ---
 function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave }) {
   const [weight, setWeight] = useState(milestoneData?.weight || '');
   const [stress, setStress] = useState(!!milestoneData?.highStressOrInsomnia);
@@ -1568,7 +1571,7 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-purple-400" />
-            <h3 className="font-black text-white text-base">Day {day} Milestone Check-In</h3>
+            <h3 className="font-black text-white text-base">บันทึกน้ำหนักวันที่ {day}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-zinc-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -1577,7 +1580,7 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
 
         <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2">
           <label className="text-[10px] font-black uppercase text-zinc-400">
-            Morning Fasted Scale Weight (kg)
+            น้ำหนักตัวตอนเช้าหลังตื่นนอน (กก.)
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -1590,7 +1593,7 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
             />
             {loss !== null && (
               <span className="text-xs font-bold px-3 py-2 rounded-xl bg-emerald-500/15 text-emerald-300 shrink-0">
-                {loss >= 0 ? `-${loss}kg` : `+${Math.abs(loss)}kg`}
+                {loss >= 0 ? `-${loss} กก.` : `+${Math.abs(loss)} กก.`}
               </span>
             )}
           </div>
@@ -1600,11 +1603,11 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
           <div className="text-xs p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-amber-200">
             {loss < 1.0 ? (
               <p>
-                <strong>Week 1 Drop &lt; 1.0 kg ({loss}kg):</strong> Adaptive rule triggered. Do NOT cut food calories further. Boost daily steps by +2,000 to +3,000 steps.
+                <strong>น้ำหนักสัปดาห์แรกลดลงน้อยกว่า 1.0 กก. ({loss} กก.):</strong> เริ่มการปรับตัว ห้ามลดอาหารลงเด็ดขาด ให้เพิ่มก้าวเดิน +2,000 ถึง +3,000 ก้าวต่อวันเพื่อเผาผลาญเพิ่มขึ้น
               </p>
             ) : (
               <p className="text-emerald-300">
-                <strong>Optimal Pace (-{loss}kg):</strong> Fat loss is on track. Sustain your current 10k-15k steps and {metrics.dailyCalories} kcal intake into Week 2.
+                <strong>ลดลงในเกณฑ์ที่ยอดเยี่ยม (-{loss} กก.):</strong> โปรแกรมได้ผลดีมาก ให้คงการเดิน 10,000-15,000 ก้าว และทาน {metrics.dailyCalories} kcal ตามเดิมในสัปดาห์ที่ 2
               </p>
             )}
           </div>
@@ -1621,11 +1624,11 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
               <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${stress ? 'bg-rose-500 text-zinc-950' : 'border border-zinc-700'}`}>
                 {stress && <Check className="w-3 h-3 stroke-[3]" />}
               </div>
-              <span>Flag Symptoms: Insomnia, Night-Waking, or Severe Lethargy</span>
+              <span>แจ้งอาการ: นอนไม่หลับ ตื่นกลางดึกบ่อย หรืออ่อนเพลียผิดปกติ</span>
             </button>
             {stress && (
               <p className="text-[11px] text-rose-300/90 p-3 rounded-xl bg-rose-950/20 border border-rose-500/30">
-                Cortisol guard active: Hold your current pace. Shift your main carb portion to Dinner and do NOT add volume.
+                เปิดโหมดควบคุมคอร์ติซอล: คงระดับการออกกำลังกายเท่าเดิม ย้ายสัดส่วนแป้ง/คาร์โบไฮเดรตหลักมาไว้ในมื้อเย็น และไม่เพิ่มความหนักในการออกกำลังกาย
               </p>
             )}
           </div>
@@ -1633,9 +1636,9 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
 
         {day === 30 && (
           <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-zinc-950 border border-emerald-500/40 text-xs space-y-2">
-            <div className="font-black text-emerald-300 text-sm">Reverse Diet Exit Ramp</div>
+            <div className="font-black text-emerald-300 text-sm">แนวทาง Reverse Diet เมื่อจบโปรแกรม</div>
             <p className="text-zinc-300 leading-relaxed">
-              To prevent fat rebound: Increase intake by +150 kcal/day each week from clean complex carbohydrates until reaching maintenance ({metrics.tdee} kcal).
+              เพื่อป้องกันโยโย่ (Fat Rebound): ค่อยๆ เพิ่มอาหารสัปดาห์ละ +150 kcal/วัน โดยเน้นคาร์โบไฮเดรตเชิงซ้อน จนกระทั่งกลับสู่ค่าเผาผลาญปกติ ({metrics.tdee} kcal)
             </p>
           </div>
         )}
@@ -1648,14 +1651,14 @@ function MilestoneModal({ day, milestoneData, profile, metrics, onClose, onSave 
           }}
           className="w-full py-3 rounded-2xl bg-purple-500 hover:bg-purple-400 text-zinc-950 font-black text-xs uppercase tracking-wider transition"
         >
-          Save & Apply Feedback
+          บันทึกข้อมูลและประเมินผล
         </button>
       </div>
     </div>
   );
 }
 
-// --- SUBCOMPONENT: ACCOUNT & CLOUD MODAL ---
+// --- โมดอลบัญชี & CLOUD ---
 function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignOut, onClose }) {
   const [copied, setCopied] = useState(false);
   const userId = user?.id || '';
@@ -1674,7 +1677,7 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cloud className="w-5 h-5 text-emerald-400" />
-            <h3 className="font-black text-white text-base">Account & Cloud Sync</h3>
+            <h3 className="font-black text-white text-base">บัญชีและการเชื่อมต่อ Cloud</h3>
           </div>
           <button onClick={onClose} className="p-1 text-zinc-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -1683,22 +1686,22 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
 
         <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 space-y-2 text-xs">
           <div className="flex justify-between items-center text-zinc-400">
-            <span>Sync Status:</span>
+            <span>สถานะการซิงก์:</span>
             <span className={`font-bold uppercase ${syncStatus === 'synced' ? 'text-emerald-400' : syncStatus === 'saving' ? 'text-amber-400' : 'text-zinc-500'}`}>
-              {syncStatus}
+              {syncStatus === 'synced' ? 'ซิงก์แล้ว' : syncStatus === 'saving' ? 'กำลังบันทึก...' : 'ออฟไลน์'}
             </span>
           </div>
           <div className="flex justify-between items-center text-zinc-400">
-            <span>Last Cloud Write:</span>
-            <span className="text-white">{syncTimestamp || 'Active'}</span>
+            <span>บันทึกคลาวด์ล่าสุด:</span>
+            <span className="text-white">{syncTimestamp || 'กำลังทำงาน'}</span>
           </div>
 
           <div className="pt-2 border-t border-zinc-800 space-y-1">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase">User ID:</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase">รหัสผู้ใช้ (UID):</span>
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 font-mono text-[11px] text-zinc-300 break-all">
-              <span className="truncate">{userId || 'Not Initialized'}</span>
+              <span className="truncate">{userId || 'ยังไม่ได้เข้าสู่ระบบ'}</span>
               {userId && (
-                <button onClick={copyUid} className="shrink-0 text-zinc-400 hover:text-white" title="Copy UID">
+                <button onClick={copyUid} className="shrink-0 text-zinc-400 hover:text-white" title="คัดลอก UID">
                   {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               )}
@@ -1729,14 +1732,14 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            Sign in with Google
+            เข้าสู่ระบบด้วย Google
           </button>
         ) : (
           <button
             onClick={onSignOut}
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-zinc-800 hover:bg-red-950/40 text-zinc-300 hover:text-red-400 border border-zinc-700/50 hover:border-red-800/50 font-medium transition"
           >
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-4 h-4" /> ออกจากระบบ
           </button>
         )}
       </div>
@@ -1744,7 +1747,7 @@ function AccountModal({ user, syncStatus, syncTimestamp, onGoogleSignIn, onSignO
   );
 }
 
-// --- SUBCOMPONENT: ONBOARDING / TARGET CALCULATOR MODAL ---
+// --- หน้าคำนวณเป้าหมายและโภชนาการ (ONBOARDING) ---
 function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
   const [form, setForm] = useState(() => ({
     age: profile.age || 28,
@@ -1778,9 +1781,9 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
             </div>
             <div>
               <span className="text-[10px] font-black uppercase text-emerald-400">
-                4-Week Aggressive Recomp
+                โปรแกรมปรับรูปร่างเร่งด่วน 4 สัปดาห์
               </span>
-              <h2 className="text-lg font-black text-white">Target Prescription Calculator</h2>
+              <h2 className="text-lg font-black text-white">คำนวณเป้าหมายและโภชนาการส่วนบุคคล</h2>
             </div>
           </div>
           {isEditing && (
@@ -1806,27 +1809,30 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
         >
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400">Gender</label>
+              <label className="text-[10px] font-black uppercase text-zinc-400">เพศ</label>
               <div className="grid grid-cols-2 gap-1.5 mt-1">
-                {['male', 'female'].map((g) => (
+                {[
+                  { key: 'male', label: 'ชาย' },
+                  { key: 'female', label: 'หญิง' }
+                ].map((g) => (
                   <button
-                    key={g}
+                    key={g.key}
                     type="button"
-                    onClick={() => setForm((f) => ({ ...f, gender: g }))}
+                    onClick={() => setForm((f) => ({ ...f, gender: g.key }))}
                     className={`py-2 rounded-xl text-xs font-bold capitalize border transition ${
-                      form.gender === g
+                      form.gender === g.key
                         ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
                         : 'bg-zinc-950 border-zinc-800 text-zinc-500'
                     }`}
                   >
-                    {g}
+                    {g.label}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400">Age</label>
+              <label className="text-[10px] font-black uppercase text-zinc-400">อายุ (ปี)</label>
               <input
                 type="number"
                 required
@@ -1839,7 +1845,7 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400">Height (cm)</label>
+              <label className="text-[10px] font-black uppercase text-zinc-400">ส่วนสูง (ซม.)</label>
               <input
                 type="number"
                 required
@@ -1849,7 +1855,7 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400">Current (kg)</label>
+              <label className="text-[10px] font-black uppercase text-zinc-400">ปัจจุบัน (กก.)</label>
               <input
                 type="number"
                 step="0.1"
@@ -1867,7 +1873,7 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400">Target (kg)</label>
+              <label className="text-[10px] font-black uppercase text-zinc-400">เป้าหมาย (กก.)</label>
               <input
                 type="number"
                 step="0.1"
@@ -1880,14 +1886,14 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
           </div>
 
           <div>
-            <label className="text-[10px] font-black uppercase text-zinc-400">Activity Level</label>
-            <div className="grid grid-cols-2 gap-2 mt-1">
+            <label className="text-[10px] font-black uppercase text-zinc-400">ระดับกิจกรรมทางกายภาพ</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
               {Object.entries(ACTIVITY_MULTIPLIERS).map(([key, item]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, activityLevel: key }))}
-                  className={`p-2 rounded-xl text-left text-[11px] border transition ${
+                  className={`p-2.5 rounded-xl text-left text-[11px] border transition ${
                     form.activityLevel === key
                       ? 'bg-emerald-500/15 border-emerald-500 text-emerald-300 font-bold'
                       : 'bg-zinc-950 border-zinc-800 text-zinc-500'
@@ -1899,14 +1905,15 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
             </div>
           </div>
 
+          {/* สรุปเป้าหมายคำนวณสด */}
           <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 grid grid-cols-2 gap-2 text-center text-xs">
             <div>
-              <span className="text-[10px] text-zinc-500">Daily Intake (-700 kcal)</span>
+              <span className="text-[10px] text-zinc-500">พลังงานที่ต้องทาน (-700 kcal)</span>
               <div className="text-base font-black text-amber-400">{livePreview.dailyCalories} kcal</div>
             </div>
             <div>
-              <span className="text-[10px] text-zinc-500">Protein Target (2g/kg)</span>
-              <div className="text-base font-black text-emerald-400">{livePreview.proteinTarget}g / day</div>
+              <span className="text-[10px] text-zinc-500">โปรตีนเป้าหมาย (2g / นน.ตัว)</span>
+              <div className="text-base font-black text-emerald-400">{livePreview.proteinTarget}g / วัน</div>
             </div>
           </div>
 
@@ -1914,7 +1921,7 @@ function OnboardingModal({ profile, metrics, isEditing, onClose, onSave }) {
             type="submit"
             className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-950/50"
           >
-            {isEditing ? 'Save Changes' : 'Initialize 30-Day Protocol'}
+            {isEditing ? 'บันทึกการเปลี่ยนแปลง' : 'เริ่มต้นโปรแกรม 30 วัน'}
           </button>
         </form>
       </div>
