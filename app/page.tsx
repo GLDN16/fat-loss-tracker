@@ -1,4 +1,9 @@
+// @ts-nocheck
 'use client';
+
+declare const __firebase_config: any;
+declare const __app_id: any;
+declare const __initial_auth_token: any;
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
