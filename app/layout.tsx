@@ -2,8 +2,12 @@ import React from 'react';
 
 export const metadata = {
   title: '30-Day Emergency Fat Loss Tracker',
-  description: 'Aggressive 4-week body recomposition protocol',
+  description: 'Aggressive Body Recomposition & Fat Loss Tracker Protocol',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
