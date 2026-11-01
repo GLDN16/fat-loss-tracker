@@ -179,73 +179,187 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // --- 1. FIREBASE AUTH SETUP ---
+// --- SUPABASE AUTH & CLOUD SYNC ---
   useEffect(() => {
-    if (!auth) {
-      setAuthLoading(false);
-      return;
-    }
-
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else if (!auth.currentUser) {
-          await signInAnonymously(auth);
-        }
-      } catch (err) {
-        console.error("Firebase auth initialization error:", err);
-      }
-    };
-
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // 1. ตรวจสอบสถานะการล็อกอินปัจจุบัน
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setAuthLoading(false);
     });
 
-    return () => unsubscribe();
+    // 2. ตรวจจับเหตุการณ์ Login / Logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // --- 2. FIRESTORE REAL-TIME SYNC LISTENER ---
+  // 3. ดึงข้อมูลจาก Cloud เมื่อมีผู้ใช้ล็อกอิน
   useEffect(() => {
-    if (!user || !db) {
-      setSyncStatus('offline');
+    if (!user) return;
+
+    const fetchUserData = async () => {
+      setSyncStatus('saving');
+      try {
+        const { data, error } = await supabase
+          .from('user_tracker')
+          .select('tracker_data')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data && data.tracker_data) {
+          isRemoteUpdate.current = true;
+          setState(data.tracker_data);
+          setSyncStatus('synced');
+          setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          showToast('ซิงก์ข้อมูลจากระบบคลาวด์เรียบร้อย');
+        } else {
+          // ผู้ใช้ใหม่: บันทึกข้อมูลตั้งต้นขึ้น Cloud
+          await supabase.from('user_tracker').upsert({
+            user_id: user.id,
+            tracker_data: state,
+            updated_at: new Date().toISOString(),
+          });
+          setSyncStatus('synced');
+        }
+      } catch (err) {
+        console.error('Fetch cloud data error:', err);
+        setSyncStatus('error');
+      }
+    };
+
+    fetchUserData();
+  }, [user?.id]);
+
+  // 4. บันทึกข้อมูลอัตโนมัติเมื่อมีการแก้ไข (Debounce 800ms)
+  useEffect(() => {
+    if (!user) {
+      try {
+        localStorage.setItem('emergency_fatloss_cache', JSON.stringify(state));
+      } catch (e) {
+        console.warn('LocalStorage save error:', e);
+      }
       return;
     }
 
-    setSyncStatus('saving');
-    const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'data', 'tracker_state');
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
 
-    const unsubscribe = onSnapshot(
-      userDocRef,
-      (snapshot) => {
-        if (snapshot.exists()) {
-          const remoteData = snapshot.data();
-          if (remoteData && remoteData.profile) {
-            isRemoteUpdate.current = true;
-            setState(remoteData);
-            setSyncStatus('synced');
-            setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          }
-        } else {
-          // If fresh user on cloud, upload initial local state
-          setDoc(userDocRef, { ...state, updatedAt: Date.now() }, { merge: true })
-            .then(() => {
-              setSyncStatus('synced');
-              setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-            })
-            .catch((err) => console.error("Initial doc write error:", err));
-        }
-      },
-      (error) => {
-        console.error("Firestore onSnapshot error:", error);
+    const timer = setTimeout(async () => {
+      setSyncStatus('saving');
+      try {
+        const { error } = await supabase.from('user_tracker').upsert({
+          user_id: user.id,
+          tracker_data: state,
+          updated_at: new Date().toISOString(),
+        });
+
+        if (error) throw error;
+        setSyncStatus('synced');
+        setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      } catch (err) {
+        console.error('Save to cloud error:', err);
         setSyncStatus('error');
       }
-    );
+    }, 800);
 
-    return () => unsubscribe();
-  }, [user]);
+    return () => clearTimeout(timer);
+  }, [state, user]);
+
+// --- SUPABASE CLOUD SYNC & AUTH ---
+  useEffect(() => {
+    // ตรวจสอบ session ทันทีที่เปิดเว็บ
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    // ตรวจจับสถานะการ Login / Logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ดึงข้อมูลของผู้ใช้เมื่อล็อกอินสำเร็จ
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUserData = async () => {
+      setSyncStatus('saving');
+      try {
+        const { data, error } = await supabase
+          .from('user_tracker')
+          .select('tracker_data')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data && data.tracker_data) {
+          isRemoteUpdate.current = true;
+          setState(data.tracker_data);
+          setSyncStatus('synced');
+          setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          showToast('ซิงก์ข้อมูลจากระบบคลาวด์เรียบร้อย');
+        } else {
+          // หากเป็นผู้ใช้ใหม่ ให้บันทึก state ปัจจุบันขึ้นเป็นข้อมูลเริ่มต้น
+          await supabase.from('user_tracker').upsert({
+            user_id: user.id,
+            tracker_data: state,
+            updated_at: new Date().toISOString(),
+          });
+          setSyncStatus('synced');
+        }
+      } catch (err) {
+        console.error('Fetch cloud data error:', err);
+        setSyncStatus('error');
+      }
+    };
+
+    fetchUserData();
+  }, [user?.id]);
+
+  // บันทึกข้อมูลขึ้น Supabase อัตโนมัติเมื่อมีการเปลี่ยนแปลง (Debounce 0.8s)
+  useEffect(() => {
+    if (!user) {
+      try {
+        localStorage.setItem('emergency_fatloss_cache', JSON.stringify(state));
+      } catch (e) {
+        console.warn('LocalStorage save error:', e);
+      }
+      return;
+    }
+
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSyncStatus('saving');
+      try {
+        const { error } = await supabase.from('user_tracker').upsert({
+          user_id: user.id,
+          tracker_data: state,
+          updated_at: new Date().toISOString(),
+        });
+
+        if (error) throw error;
+        setSyncStatus('synced');
+        setSyncTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      } catch (err) {
+        console.error('Save to cloud error:', err);
+        setSyncStatus('error');
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [state, user]);
 
   // --- 3. CLOUD SAVE WITH LOCAL RECOVERY ---
   const saveState = (updater) => {
