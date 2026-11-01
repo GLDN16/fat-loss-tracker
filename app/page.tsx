@@ -26,7 +26,9 @@ import {
   LogOut,
   RefreshCw,
   Copy,
-  Check
+  Check,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
 
 // เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
