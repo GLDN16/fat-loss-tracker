@@ -56,8 +56,8 @@ import {
 } from 'lucide-react';
 
 // เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ddaofydnexklkxclwuqc.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = 'https://ddaofydnexklkxclwuqc.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkYW9meWRuZXhrbGt4Y2x3dXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjU2MjQsImV4cCI6MjEwOTEwMTYyNH0.3Abkj_ZhUOnaL9m-3RuuD2Xz6Mi3fpLgTyfbsYghO6M';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'emergency-fat-loss-pwa';
