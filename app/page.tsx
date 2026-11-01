@@ -28,7 +28,10 @@ import {
   Copy,
   Check,
   Cloud,
-  CloudOff
+  CloudOff,
+  BookOpen,
+  Info,
+  Target
 } from 'lucide-react';
 
 // เชื่อมต่อ Supabase โดยอัตโนมัติจาก Environment Variables ที่ตั้งไว้ใน Vercel
