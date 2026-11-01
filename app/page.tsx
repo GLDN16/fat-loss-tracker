@@ -40,26 +40,6 @@ import {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ddaofydnexklkxclwuqc.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
-// --- FIREBASE CONFIGURATION & INITIALIZATION ---
-const firebaseConfig = typeof __firebase_config !== 'undefined'
-  ? JSON.parse(__firebase_config)
-  : {
-      apiKey: "demo-api-key",
-      authDomain: "demo-fatloss.firebaseapp.com",
-      projectId: "demo-fatloss",
-      storageBucket: "demo-fatloss.appspot.com",
-      messagingSenderId: "1000000000",
-      appId: "1:1000000000:web:abcdef123456"
-    };
-
-let app, auth, db;
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-} catch (e) {
-  console.warn("Firebase initialization notice:", e);
-}
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'emergency-fat-loss-pwa';
 
@@ -471,27 +451,28 @@ export default function App() {
     }));
   };
 
-  // Google Sign-In Handler
+// Google Sign-In Handler (Supabase)
   const handleGoogleSignIn = async () => {
-    if (!auth) return;
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      showToast("Signed in with Google! Cloud sync active.");
-      setShowAccountModal(false);
-    } catch (err) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
       console.error("Google sign-in error:", err);
-      showToast("Failed to authenticate with Google.");
+      showToast("เข้าสู่ระบบไม่สำเร็จ: " + (err.message || ""));
     }
   };
 
-  // Sign out Handler
+  // Sign out Handler (Supabase)
   const handleSignOut = async () => {
-    if (!auth) return;
     try {
-      await signOut(auth);
-      await signInAnonymously(auth);
-      showToast("Signed out. Switched to anonymous device session.");
+      await supabase.auth.signOut();
+      setUser(null);
+      showToast("ออกจากระบบแล้ว");
       setShowAccountModal(false);
     } catch (e) {
       console.error(e);
