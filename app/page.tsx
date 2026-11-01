@@ -1489,7 +1489,7 @@ function ProfileTab({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
             <span className="text-zinc-500 text-[10px] uppercase">แคลอรีที่ต้องทานต่อวัน</span>
             <div className="text-base font-black text-amber-400 mt-0.5">{metrics.dailyCalories} kcal</div>
@@ -1505,14 +1505,29 @@ function ProfileTab({
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
             <span className="text-zinc-500 text-[10px] uppercase">น้ำหนักล่าสุด</span>
             <div className="text-base font-black text-white mt-0.5">{latestWeight} กก.</div>
+            <span className="text-[10px] text-zinc-500">จากเริ่มต้น {profile.startWeight} กก.</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
             <span className="text-zinc-500 text-[10px] uppercase">น้ำหนักเป้าหมาย</span>
             <div className="text-base font-black text-emerald-400 mt-0.5">{profile.targetWeight} กก.</div>
+            <span className="text-[10px] text-zinc-500">เป้าลด {profile.startWeight - profile.targetWeight > 0 ? (profile.startWeight - profile.targetWeight).toFixed(1) : 0} กก.</span>
+          </div>
+
+          {/* ส่วนสูง (เพิ่มใหม่) */}
+          <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+            <span className="text-zinc-500 text-[10px] uppercase">ส่วนสูง</span>
+            <div className="text-base font-black text-white mt-0.5">{profile.height} ซม.</div>
+            <span className="text-[10px] text-zinc-500">คำนวณอัตราเผาผลาญ</span>
+          </div>
+
+          {/* อายุ และ เพศ (เพิ่มใหม่) */}
+          <div className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+            <span className="text-zinc-500 text-[10px] uppercase">อายุ</span>
+            <div className="text-base font-black text-white mt-0.5">{profile.age} ปี</div>
+            <span className="text-[10px] text-zinc-500">เพศ{profile.gender === 'male' ? 'ชาย' : 'หญิง'}</span>
           </div>
         </div>
-      </div>
 
       {/* ปุ่มรีเซ็ตโปรแกรม */}
       <div className="pt-2 flex justify-center">
